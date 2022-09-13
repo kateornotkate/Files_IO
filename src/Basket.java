@@ -37,27 +37,31 @@ public class Basket {
     }
 
     //  saveTxt(File textFile) - метод сохранения корзины в текстовый файл;
-    public void saveTxt(File textFile) throws IOException {
-        BufferedWriter bw = new BufferedWriter(new FileWriter(textFile));
-        for (int i = 0; i < products.length; i++) {
-            bw.write(products[i] + " " + amount[i] + " шт " + prices[i]
-                    + " руб/шт " + (amount[i] * prices[i]) + " руб в сумме.\n");
+    public void saveTxt(File textFile) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(textFile))) { //  try-with-resources Statement
+            for (int i = 0; i < products.length; i++) {
+                bw.write(products[i] + " " + amount[i] + " шт " + prices[i]
+                        + " руб/шт " + (amount[i] * prices[i]) + " руб в сумме.\n");
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        bw.close();
     }
 
     //  метод восстановления объекта корзины из текстового файла, в который ранее была она сохранена;
-    public static Basket loadFromTxtFile(File textFile) throws IOException {
+    public static Basket loadFromTxtFile(File textFile) {
         int productIndex = 0;
         int[] amount = new int[products.length];
-        BufferedReader br = new BufferedReader(new FileReader(textFile));
-        String line;
-        while ((line = br.readLine()) != null) {
-            String[] lines = line.split(" "); //
-            amount[productIndex] = Integer.parseInt(lines[1]);
-            productIndex++;
+        try (BufferedReader br = new BufferedReader(new FileReader(textFile))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] lines = line.split("\\s"); //
+                amount[productIndex] = Integer.parseInt(lines[1]);
+                productIndex++;
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        br.close();
         return new Basket(products, prices, amount);
     }
 }
