@@ -4,14 +4,14 @@ import java.util.Scanner;
 
 public class Main {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, ClassNotFoundException {
         Scanner scanner = new Scanner(System.in);
 
         String[] products = {"Хлеб", "Молоко", "Сыр"};
         int[] prices = {50, 100, 250};
 
         Basket basket = new Basket(products, prices);
-        File basketFile = new File("basket.txt");
+        File basketFile = new File("basket.bin");
 
         if (basketFile.exists()) {
             System.out.println("""
@@ -20,7 +20,7 @@ public class Main {
                     Если хотите сбросить корзину, введите любое число или символ.""");
             String input = scanner.nextLine().toLowerCase();
             if (input.equals("")) {
-                basket = Basket.loadFromTxtFile(basketFile);
+                basket = Basket.loadFromBinFile(basketFile);
             } else {
                 basket = new Basket(products, prices);
                 System.out.println("Ваша корзина пуста. Добавьте необходимые товары.");
@@ -38,7 +38,7 @@ public class Main {
             System.out.println("Выберите товар и количество или введите \"end\".");
             String input = scanner.nextLine();
             if (input.equals("end")) {
-                basket.saveTxt(basketFile); // сохранение корзины в текстовый файл;
+                basket.saveBin(basketFile); // сохранение корзины в текстовый файл;
                 break;
             }
             String[] parts = input.split(" ");
