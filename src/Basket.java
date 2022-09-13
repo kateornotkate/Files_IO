@@ -36,19 +36,23 @@ public class Basket implements Serializable {
         System.out.println("Итого: " + sum + " руб.");
     }
 
-    // метод сохранения корзины в бинарном формате;
-    public void saveBin(File file) throws IOException {
-        Basket basket = new Basket(products, prices, amount);
-        ObjectOutputStream output = new ObjectOutputStream(new FileOutputStream(file));
-        output.writeObject(basket);
-        output.close();
+    //  метод сохранения корзины в бинарном формате;
+    public void saveBin(File file) {
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file))) {
+            out.writeObject(this);
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
     }
 
-    // метод восстановления корзины из бинарного файла;
-    public static Basket loadFromBinFile(File file) throws IOException, ClassNotFoundException {
-        ObjectInputStream input = new ObjectInputStream(new FileInputStream(file));
-        Basket basket = (Basket) input.readObject();
-        input.close();
+    //  метод восстановления корзины из бинарного файла;
+    public static Basket loadFromBinFile(File file) { // метод для загрузки корзины из бинарного файла
+        Basket basket = null;
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
+            basket = (Basket) in.readObject();
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
         return basket;
     }
 }
