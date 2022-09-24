@@ -10,39 +10,44 @@ import java.util.Scanner;
 
 public class Main {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
         String[] products = {"Хлеб", "Молоко", "Сыр"};
         int[] prices = {50, 100, 250};
-
         Basket basket = new Basket(products, prices);
-        File basketFile = new File("basket.json");
+
+        Configuration config = new Configuration();
+        config.loadConfig(); //считываем настройки shop.xml;
+        File basketFile = new File(config.getSaveName());
 
         GsonBuilder builder = new GsonBuilder();
         Gson gson = builder.create();
 
-        if (basketFile.exists()) {
-            System.out.println("""
-                    Данные прошлой корзины были успешно восстановлены.
-                    Нажмите ENTER, если хотите продолжить покупки.
-                    Если хотите сбросить корзину, введите любое число или символ.""");
-            String input = scanner.nextLine().toLowerCase();
-            if (input.equals("")) {
-                try (JsonReader reader = new JsonReader(new FileReader(basketFile))) {
-                    basket = gson.fromJson(reader, Basket.class);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            } else {
-                basket = new Basket(products, prices);
-                System.out.println("Ваша корзина пуста. Добавьте необходимые товары.");
+        // для выгрузки корзины в формате json;
+        if (config.getLoadFormat().equals("json") && basketFile.exists()) {
+            try (JsonReader reader = new JsonReader(new FileReader(config.getLoadName()))) {
+                basket = gson.fromJson(reader, Basket.class);
+                System.out.println(
+                        "Данные прошлой корзины были успешно восстановлены.\n" +
+                                "Давайте продолжим покупки :)");
+                basket.printCart();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
+            // для выгрузки корзины в формате txt;
+        } else if (config.getLoadFormat().equals("txt") && basketFile.exists()) {
+            basket = Basket.loadFromTxtFile(new File(config.getLoadName()));
+            System.out.println(
+                    "Данные прошлой корзины были успешно восстановлены.\n" +
+                            "Давайте продолжим покупки :)");
+            basket.printCart();
+            // начинаем с пустой корзины, если никаких раннее сохраненных файлов нет;
         } else {
             basket = new Basket(products, prices);
         }
 
-        System.out.println("Список возможных товаров для покупки: ");
+        System.out.println("\nСписок возможных товаров для покупки: ");
         for (int i = 0; i < products.length; i++) {
             System.out.println((i + 1) + ". " + products[i] + " " + prices[i] + " руб/шт");
         }
@@ -51,11 +56,21 @@ public class Main {
             System.out.println("Выберите товар и количество или введите \"end\".");
             String input = scanner.nextLine();
             if (input.equals("end")) {
-                try (FileWriter file = new FileWriter(basketFile)) {
-                    file.write(gson.toJson(basket));
+                // если в настройках сохранения указан формат json;
+                if (config.getSafeFormat().equals("json")) {
+                    try (FileWriter jsonWriter = new FileWriter(config.getSaveName())) {
+                        jsonWriter.write(gson.toJson(basket));
+                        break;
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    // если в настройках сохранения указан формат txt;
+                } else if (config.getSafeFormat().equals("txt")) {
+                    basket.saveTxt(new File(config.getSaveName()));
                     break;
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    // если ничего не указанно, то не сохраняем корзину;
+                } else {
+                    break;
                 }
             }
             String[] parts = input.split(" ");
@@ -64,6 +79,8 @@ public class Main {
             basket.addToCart(productNumber, productCount);
         }
         basket.printCart();
-        ClientLog.exportAsCSV(new File("log.csv"));
+        if (config.isLog()) {
+            ClientLog.exportAsCSV(new File(config.getLogName()));
+        }
     }
 }
