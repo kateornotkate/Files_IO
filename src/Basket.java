@@ -21,6 +21,7 @@ public class Basket {
 
     public void addToCart(int productNumber, int productCount) {
         amount[productNumber] += productCount;
+        ClientLog.log(productNumber, productCount);
     }
 
     public void printCart() {
