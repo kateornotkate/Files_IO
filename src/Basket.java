@@ -1,8 +1,8 @@
 import java.io.*;
 
 public class Basket {
-    private static String[] products;
-    private static int[] prices;
+    private String[] products;
+    private int[] prices;
     private final int[] amount;
 
     // конструктор объекта;
@@ -51,14 +51,19 @@ public class Basket {
 
     //  метод восстановления объекта корзины из текстового файла, в который ранее была она сохранена;
     public static Basket loadFromTxtFile(File textFile) {
-        int productIndex = 0;
-        int[] amount = new int[products.length];
+        int index = 0;
+        int size = 3;
+        String[] products = new String[size];
+        int[] amount = new int[size];
+        int[] prices = new int[size];
         try (BufferedReader br = new BufferedReader(new FileReader(textFile))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] lines = line.split("\\s"); //
-                amount[productIndex] = Integer.parseInt(lines[1]);
-                productIndex++;
+            String lines;
+            while ((lines = br.readLine()) != null) {
+                String[] line = lines.split("\\s"); //
+                products[index] = line[0];
+                amount[index] = Integer.parseInt(line[1]);
+                prices[index] = Integer.parseInt(line[3]);
+                index++;
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
