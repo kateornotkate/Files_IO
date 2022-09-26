@@ -10,11 +10,11 @@ import java.util.Scanner;
 
 public class Main {
 
+    public static String[] products = {"Хлеб", "Молоко", "Сыр"};
+    public static int[] prices = {50, 100, 250};
+
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-
-        String[] products = {"Хлеб", "Молоко", "Сыр"};
-        int[] prices = {50, 100, 250};
         Basket basket = new Basket(products, prices);
 
         Configuration config = new Configuration();

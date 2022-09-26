@@ -41,8 +41,7 @@ public class Basket {
     public void saveTxt(File textFile) {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(textFile))) { //  try-with-resources Statement
             for (int i = 0; i < products.length; i++) {
-                bw.write(products[i] + " " + amount[i] + " шт " + prices[i]
-                        + " руб/шт " + (amount[i] * prices[i]) + " руб в сумме.\n");
+                bw.write(products[i] + "," + amount[i] + "," + prices[i] + "\n");
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -52,17 +51,16 @@ public class Basket {
     //  метод восстановления объекта корзины из текстового файла, в который ранее была она сохранена;
     public static Basket loadFromTxtFile(File textFile) {
         int index = 0;
-        int size = 3;
-        String[] products = new String[size];
-        int[] amount = new int[size];
-        int[] prices = new int[size];
+        String[] products = new String[Main.products.length];
+        int[] amount = new int[Main.products.length];
+        int[] prices = new int[Main.products.length];
         try (BufferedReader br = new BufferedReader(new FileReader(textFile))) {
             String lines;
             while ((lines = br.readLine()) != null) {
-                String[] line = lines.split("\\s"); //
+                String[] line = lines.split(",");
                 products[index] = line[0];
                 amount[index] = Integer.parseInt(line[1]);
-                prices[index] = Integer.parseInt(line[3]);
+                prices[index] = Integer.parseInt(line[2]);
                 index++;
             }
         } catch (IOException e) {
